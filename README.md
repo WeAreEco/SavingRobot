@@ -10,5 +10,4 @@ You need Node.js v4.0+ to run these commands. Prefer using `yarn` over `npm`.
 
 # Firebase hosting deploy
 
-- Copy all from `build` folder to `firebase_hosting` folder.
-- `firebase deploy`
+- `firebase deploy --only hosting:savingrobot`
