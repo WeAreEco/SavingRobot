@@ -16,13 +16,13 @@ class YesNoButton extends Component {
           className={`message-item-wrapper`}
           onClick={() => this.props.setSelectedOption("Yes")}
         >
-          <div className="message">Yes</div>
+          <div className="message" style={{backgroundColor:"#D5FEC6"}}>Yes</div>
         </div>
         <div
           className={`message-item-wrapper`}
           onClick={() => this.props.setSelectedOption("No")}
         >
-          <div className="message">No</div>
+          <div className="message" style={{backgroundColor:"#FFCBCA"}}>No</div>
         </div>
       </div>
     );

@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 import { saveRetailers } from "../redux/actions";
 import Firebase from "../firebasehelper";
 import { FadeLoader } from "react-spinners";
-import { isMobile } from "react-device-detect";
+import Header from "./Header";
 import { css } from "@emotion/core";
 
 const override = css`
@@ -19,13 +19,6 @@ const override = css`
   border-color: grey;
 `;
 
-function inIframe() {
-  try {
-    return window.self !== window.top;
-  } catch (e) {
-    return true;
-  }
-}
 
 class Screen extends React.Component {
   constructor(props) {
@@ -68,25 +61,10 @@ class Screen extends React.Component {
     } = this.state;
     const { name, icon, logo } = this.props;
     return (
-      <div className="app-wrapper">
-        {!inIframe() && !isMobile && (
-          <div className="header-container">
-            <button
-              className="header-logo"
-              style={{
-                backgroundImage: `url(${logo})`,
-                backgroundRepeat: "no-repeat",
-                backgroundPosition: "center",
-                backgroundSize: "contain",
-                backgroundColor: "transparent",
-                border: "none",
-                cursor: "pointer",
-                width: 120,
-                height: 40,
-              }}
-            ></button>
-          </div>
-        )}
+      <div>
+      <Header></Header>
+      <div className="app-wrapper"> 
+        <div style={{height:70}}></div>
         {loading && (
           <FadeLoader
             css={override}
@@ -105,6 +83,7 @@ class Screen extends React.Component {
             profile={profile}
           />
         )}
+      </div>
       </div>
     );
   }

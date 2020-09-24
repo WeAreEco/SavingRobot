@@ -13,7 +13,6 @@ export const getInputTimeoutValue = () => {
 };
 
 export const getBotMessageGroup = () => {
-  console.log("originalbot", botMessages);
   return botMessages.shift();
 };
 
@@ -32,11 +31,9 @@ export const getBotMessage = message => {
   });
 };
 export const addBotMessages = messages => {
-  console.log("originalbot", botMessages);
   messages.map(item => {
     return botMessages.push(item);
   });
-  console.log("botMessages", botMessages);
 };
 export const clearBotMessages = ()=>{
   botMessages.length = 0;

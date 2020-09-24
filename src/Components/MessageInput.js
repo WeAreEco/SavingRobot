@@ -118,15 +118,18 @@ class MessageInput extends Component {
         )}
         <div className="message-input-container">
           {message.key.includes("phone") && <p>+44</p>}
-          {message.key === "money" && <p>£</p>}
           <input
             type="text"
             value={value}
             placeholder={message.placeholder}
-            className={`${message.key.includes("phone") ? "phone" : ""}  ${
-              message.key === "money" ? "money" : ""
-            }`}
-            onChange={this.onChange}
+            className={`${message.key.includes("phone") ? "phone" : ""}
+            ${message.key === "bill-price" ? "bill-price" : ""}
+            `}
+            onChange={
+              message.key === "bill-price"
+                ? this.onChangeBillPrice
+                : this.onChange
+            }
             onKeyPress={(e) => {
               if (e.charCode === 13) this.addMessage();
             }}
@@ -243,22 +246,25 @@ class MessageInput extends Component {
     return <YesNoButton setSelectedOption={this.chooseOption} />;
   }
   getCardInput() {
-    const { addMessage, message,retailers } = this.props;
+    const { addMessage, message,retailers,getBotMessageGroup } = this.props;
     let retailerType = message.retailerType;
     let retailers_data = retailers.all;
     let deactive = retailers.deactive;
-    let result = filterRetailers(retailers_data,deactive,retailerType);
+    console.log("retailers_data",retailers_data);
     let cards = [];
-    if(result.length){
-      cards = result.map(item=>{
-        let name = item.retailerName;
-        let description = "20%";
-        let image = item.logo;
-        return {name,description,image};
-      });
+    if(retailers_data){
+      let result = filterRetailers(retailers_data,deactive,retailerType);
+      if(result.length){
+        cards = result.map(item=>{
+          let name = item.retailerName;
+          let image = item.logo;
+          return {name,image};
+        });
+        cards.splice(6);
+      }
     }
-   
-    if(Object.values(retailers).length===0)
+    
+    if(!retailers_data)
     return <FadeLoader
             css={override}
             sizeUnit={"px"}
@@ -267,9 +273,32 @@ class MessageInput extends Component {
           />
     else
     return (
-      <CardContainer addMessage={addMessage} cards={cards} message={message} />
+      <CardContainer addMessage={addMessage} cards={cards} message={message} getBotMessageGroup={getBotMessageGroup} />
     );
   }
+  onChangeBillPrice = ({ target: { value } }) => {
+    let newValue = value.split(".");
+    if (newValue.length > 1) {
+      newValue =
+        newValue.slice(0, -1).join("") + "." + newValue[newValue.length - 1];
+    } else {
+      newValue = value;
+    }
+    const countDecimals = function (number) {
+      if (Math.floor(number) === Number(number)) return 0;
+      return number.toString().split(".")[1].length || 0;
+    };
+    let number = Number(newValue.replace(/[^0-9\.]+/g, ""));
+    const decimalPoints = countDecimals(newValue);
+    if (decimalPoints >= 3) {
+      number = number * 10;
+    } else {
+      number = number / Math.pow(10, 2 - decimalPoints);
+    }
+    this.setState({
+      value: `${number.toFixed(2)}`,
+    });
+  };
   onChange = (e) => {
     this.setState({
       value: e.target.value,
@@ -424,12 +453,13 @@ class MessageInput extends Component {
             isNext: message.isNext,
           });
         }
-      }else if (message.key === "money") {
-        profile["money"] = value;
-        let money = "£"+value;
+      }else if (message.key === "bill-price") {
+        profile[message.category] = value;
         addMessage({
           type: "user",
-          message: money,
+          message: `£${value}`,
+          category: message.category,
+          benefit: message.benefit,
           key: message.key,
           inputType: "input",
           profile: profile,

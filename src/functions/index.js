@@ -12,3 +12,6 @@ export const filterRetailers = (retailers,deactive,tag)=> {
       }
       return filteredRetailerKeys.map((key) =>retailers[key]);   
 }
+export const financial = x=> {
+  return Number.parseFloat(x).toFixed(2);
+}

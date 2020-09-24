@@ -5,7 +5,9 @@ export const initialState = {
   uid: "",
   brand: {},
   users: [],
-  retailers:[]
+  firstname:"",
+  retailers:[],
+  totalsaving:0
 };
 
 const saveProfileReducer = (state, action) => ({
@@ -16,9 +18,17 @@ const saveUIDReducer = (state, action) => ({
   ...state,
   uid: action.uid
 });
+const saveTotalSavingReducer = (state,action)=>({
+  ...state,
+  totalsaving:action.totalsaving
+})
 const saveBrandReducer = (state, action) => ({
   ...state,
   brand: action.brand
+});
+const saveFirstnameReducer = (state, action) => ({
+  ...state,
+  firstname: action.firstname
 });
 const saveRetailersReducer = (state, action) => ({
   ...state,
@@ -34,14 +44,18 @@ const removeAllReducer = (state, action) => ({
   brand: null,
   uid: null,
   posts: null,
-  users: []
+  users: [],
+  firstname:null,
+  totalsaving:0
 });
 const actionHandlers = {
   SAVE_PROFILE: saveProfileReducer,
+  SAVE_FIRSTNAME: saveFirstnameReducer,
   SAVE_RETAILERS: saveRetailersReducer,
   SAVE_UID: saveUIDReducer,
   SAVE_BRAND: saveBrandReducer,
   SAVE_USERS: saveUsersReducer,
+  SAVE_TOTALSAVING: saveTotalSavingReducer,
   REMOVE: removeAllReducer
 };
 export default createReducer(initialState, actionHandlers);

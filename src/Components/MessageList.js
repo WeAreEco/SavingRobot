@@ -4,6 +4,7 @@ import MessageItem from "./MessageItem";
 import MessageInput from "./MessageInput";
 import Firebase from "../firebasehelper";
 import ErrorModal from "./ErrorModal";
+import { connect } from "react-redux";
 import {
   getBotMessageGroup,
   getBetweenTimeoutValue,
@@ -11,11 +12,13 @@ import {
   getInputTimeoutValue,
   addBotMessageGroup,
   addBotMessages,
+  clearBotMessages
 } from "../Utils/botMessages";
 import {
   getUserMessage,
   addUserMessage,
   addUserMessages,
+  clearUserMessages
 } from "../Utils/userMessages";
 import {
   registered_botMessages,
@@ -23,7 +26,8 @@ import {
   registration_botMessages,
   registration_userMessages,
 } from "../Constants/messages";
-
+import { saveFirstname,saveTotalSaving } from "../redux/actions";
+import {financial} from "../functions";
 class MessageList extends Component {
   constructor(props) {
     super(props);
@@ -54,7 +58,6 @@ class MessageList extends Component {
     this.setState({ brand: logo });
     if (restart) {
       this.setState({ uid: uid, profile: profile });
-      console.log("MessageList restart");
       this.restart();
     }
     this.getBotMessageGroup();
@@ -62,38 +65,12 @@ class MessageList extends Component {
 
   restart = () => {
     this.setState({ messages: [] });
-    
   };
   getBotMessageGroup = () => {
     this.setState({
       showInput: false,
     });
     let messageGroup = getBotMessageGroup();
-    // if (!messageGroup) {
-    //   addBotMessages([
-    //     [
-    //       {
-    //         type: "bot",
-    //         message: "Hello, are you a member?",
-    //       },
-    //     ],
-    //   ]);
-    //   addUserMessages([
-    //     {
-    //       type: "user",
-    //       inputType: "toggleButton",
-    //       options: [
-    //         {
-    //           text: "No, I'd like to register for a 30 day trial",
-    //           value: "No",
-    //         },
-    //         { text: "Yes", value: "Yes" },
-    //       ],
-    //       key: "is_member",
-    //     },
-    //   ]);
-    //   messageGroup = getBotMessageGroup();
-    // }
     if (messageGroup) {
       messageGroup.forEach((message, index) => {
         const timeoutValue =
@@ -168,6 +145,7 @@ class MessageList extends Component {
   }
   addMessage = (message) => {
     const { brand, uid, profile } = this.state;
+    let {totalsaving} = this.props;
     if (message.inputType === "input" && message.key === "firstname") {
       setTimeout(() => {
         this.scrollToBottom();
@@ -176,8 +154,10 @@ class MessageList extends Component {
           type: "bot",
           message: `Great, thanks ${firstname}. `,
         });
+        this.props.dispatch(saveFirstname(firstname));
         this.getBotMessageGroup();
       }, getBetweenTimeoutValue());
+
     } else if (message.key === "is_member") {
       if (message.message === "Yes") {
         this.setState({ is_member: true });
@@ -317,26 +297,38 @@ class MessageList extends Component {
             });
           });
       }
-    }else if(message.key === "money"){
+    }else if(message.key === "bill-price"){
       let profile = message.profile;
+      let category = message.category;
+      let benefit = message.benefit;
       addUserMessage({
         type: "user",
         inputType: "card",
-        retailerType:"Food and Drink",
+        retailerType:category,
         key: "retailers"
       });
-      let money = profile["money"];
-      let weekly_save = money*0.2;
-      let monthly_save = weekly_save*4;
+      let money = profile[category];
+      let weekly_save = financial(money*benefit);
+      let monthly_save =financial(weekly_save*4);
+      let tot_save = financial(Number.parseFloat(totalsaving)+Number.parseFloat(monthly_save));
+      
+      this.props.dispatch(saveTotalSaving(tot_save));
       addBotMessageGroup([
         {
           type:"bot",
-          message:"Brilliant, Ecosystem will save you on average £"+weekly_save.toFixed(2)+" per week and £"+monthly_save.toFixed(2)+" per month with our friends, including:"
+          message:"Your Ecosystem will save you on average £"+weekly_save+" per week and £"+monthly_save+" per month with our friends, including:"
         }
       ]);
       this.getBotMessageGroup();
-    }
-     else {
+    }else if(message.key === "agree"){
+      if(message.message==="No"){
+        console.log("Rstart");
+        this.restart();
+        clearBotMessages();
+        clearUserMessages();
+      }
+      this.getBotMessageGroup();
+    }else {
       if (!message.finish) {
         setTimeout(() => {
           this.getBotMessageGroup();
@@ -364,7 +356,7 @@ class MessageList extends Component {
     window.location.reload();
   };
   render() {
-    const { logo, tier_data,chatbot } = this.props;
+    const { logo } = this.props;
     const {
       showInput,
       userMessage,
@@ -385,11 +377,11 @@ class MessageList extends Component {
             <MessageInput
               message={userMessage}
               addMessage={this.addMessage}
+              getBotMessageGroup={this.getBotMessageGroup}
               isIphoneX={isIphoneX}
               logo={logo}
               brand={brand}
               is_member={is_member}
-              tier_data={tier_data}
               onRestart={this.goBack}
               profile={profile}
               uid={uid}
@@ -407,4 +399,15 @@ class MessageList extends Component {
   }
 }
 
-export default MessageList;
+function mapDispatchToProps(dispatch) {
+  return {
+    dispatch,
+  };
+}
+function mapStateToProps(state) {
+  return {
+    firstname: state.firstname,
+    totalsaving: state.totalsaving
+  };
+}
+export default connect(mapStateToProps, mapDispatchToProps)(MessageList);

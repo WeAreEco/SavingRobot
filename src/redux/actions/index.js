@@ -8,9 +8,11 @@
 export const SAVE_PROFILE = "SAVE_PROFILE";
 export const SAVE_UID = "SAVE_UID";
 export const SAVE_USERS = "SAVE_USERS";
+export const SAVE_FIRSTNAME = "SAVE_FIRSTNAME";
 export const REMOVE = "REMOVE";
 export const SAVE_BRAND = "SAVE_BRAND";
 export const SAVE_RETAILERS = "SAVE_RETAILERS";
+export const SAVE_TOTALSAVING = "SAVE_TOTALSAVING";
 
 export const saveProfile = profile => ({
   type: SAVE_PROFILE,
@@ -21,6 +23,14 @@ export const saveUsers = users => ({
   type: SAVE_USERS,
   users: users
 });
+export const saveFirstname = firstname =>({
+  type: SAVE_FIRSTNAME,
+  firstname:firstname
+})
+export const saveTotalSaving = totalsaving =>({
+  type: SAVE_TOTALSAVING,
+  totalsaving: totalsaving
+})
 export const saveRetailers = retailers => ({
   type: SAVE_RETAILERS,
   retailers: retailers

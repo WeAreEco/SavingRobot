@@ -5,7 +5,7 @@ export const botMessages = [
   [
     {
       type: "bot",
-      message: "May I take your first name please?",
+      message: "Hi. Welcome to your money saving robot, may I take your first name please?",
     },
   ],
   [
@@ -21,9 +21,39 @@ export const botMessages = [
     },
     {
       type:"bot",
-      message:"How much do you spend weekly on dining out and entertainment?"
+      message:"What do you spend every month on food and drink? This includes dining out, coffee stops and takeaways... Tell the truth, we won't share any secrets we promise."
     }
   ],
+  [
+    {
+      type:"bot",
+      message:"What do you spend each month on your beauty and wellbeing please?"
+    }
+  ],
+  [
+    {
+      type:"bot",
+      message:"What do you spend each month on fashion shopping please?"
+    }
+  ],
+  [
+    {
+      type:"bot",
+      message:"What do you spend each month on your your home and interior design/decoration please?"
+    }
+  ],
+  [
+    {
+      type:"bot",
+      message:"What do you spend each month on tech and gadgets? Please include any subscription costs or mobile phone leases?"
+    }
+  ],
+  [
+    {
+      type:"bot",
+      message:"What's your monthly spend on entertainment? This includes music subscriptions, Spotify, Amazon & of course Netflix firstname..."
+    }
+  ]
 ];
 
 export const userMessages = [
@@ -36,13 +66,62 @@ export const userMessages = [
   },
   {
     type: "user",
-    inputType: "static",
-    message:"Ok",
+    inputType: "yesno",
+    key:"agree"
   },
   {
     type: "user",
     inputType: "input",
-    key: "money"
+    key: "bill-price",
+    category:"Food & Drink",
+    benefit:0.2,
+    placeholder: `£00.00`,
+    maxLength: 7,
+  },
+  {
+    type: "user",
+    inputType: "input",
+    key: "bill-price",
+    category:"Beauty & Wellbeing",
+    benefit:0.09,
+    placeholder: `£00.00`,
+    maxLength: 7,
+  },
+  {
+    type: "user",
+    inputType: "input",
+    key: "bill-price",
+    category:"Fashion",
+    benefit:0.1,
+    placeholder: `£00.00`,
+    maxLength: 7,
+  },
+  {
+    type: "user",
+    inputType: "input",
+    key: "bill-price",
+    category:"Home",
+    benefit:0.2,
+    placeholder: `£00.00`,
+    maxLength: 7,
+  },
+  {
+    type: "user",
+    inputType: "input",
+    key: "bill-price",
+    category:"Tech",
+    benefit:0.15,
+    placeholder: `£00.00`,
+    maxLength: 7,
+  },
+  {
+    type: "user",
+    inputType: "input",
+    key: "bill-price",
+    category:"Entertainment",
+    benefit:0.25,
+    placeholder: `£00.00`,
+    maxLength: 7,
   }
 ];
 export const registration_botMessages = [
