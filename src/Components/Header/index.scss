@@ -19,13 +19,15 @@
       align-items: center;
       justify-content: space-between;
       width: 100%;
-        button.saving{
-          height: 40px;
-          border-radius: 12px;
-          box-shadow:0px 0px 3px 1px rgba(0,0,0,0.2);
-          background-color: #FAFF87 ;
-          width: 170px;
-          }
+      button{
+        background-color: #FAFF87 ;
+      }
+      button.saving{
+        height: 40px;
+        border-radius: 12px;
+        box-shadow:0px 0px 3px 1px rgba(0,0,0,0.2);
+        width: 170px;
+        }
       @media (max-width: 767px) {
         .header-logo {
           height: 50px !important;

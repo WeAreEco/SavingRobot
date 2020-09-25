@@ -423,6 +423,7 @@ class MessageList extends Component {
       let benefit = message.benefit;
 
       let money = profile[category];
+      console.log("money",money);
       let weekly_save = financial(money*benefit);
       let monthly_save =financial(weekly_save*4);
       let tot_save = financial(Number.parseFloat(totalsaving)+Number.parseFloat(monthly_save));

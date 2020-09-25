@@ -286,7 +286,7 @@ class MessageInput extends Component {
       number = number / Math.pow(10, 2 - decimalPoints);
     }
     this.setState({
-      value: `${number.toFixed(2)}`,
+      value: `£${number.toFixed(2)}`,
     });
   };
   onChange = (e) => {
@@ -444,10 +444,10 @@ class MessageInput extends Component {
           });
         }
       }else if (message.key === "bill-price") {
-        profile[message.category] = value;
+        profile[message.category] = value.substring(1);
         addMessage({
           type: "user",
-          message: `£${value}`,
+          message: `${value}`,
           category: message.category,
           benefit: message.benefit,
           key: message.key,
