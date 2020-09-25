@@ -7,15 +7,13 @@ class CardContainer extends Component {
 		selected: {},
 		selectedCard: {}
 	};
-
-	onClick = (card) => {
-		console.log("name",card.name);
-		this.props.getBotMessageGroup();
-	};
+	componentDidMount(){
+		//this.props.getBotMessageGroup();
+	}
 	getCards() {
 		const { cards } = this.props;
 		const allCards =  cards.map((card, i) => {
-			return <Card onClick={this.onClick} card={card}/>;
+			return <Card card={card}/>;
 		});
 		return allCards;
 	}

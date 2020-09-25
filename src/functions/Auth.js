@@ -93,3 +93,22 @@ export const getStringfromSeconds = function(time) {
   t = dd + "th " + month;
   return t;
 };
+export const inviteFriend = async (
+  firstName,
+  otherName,
+  brand,
+  phoneNumber,
+  bespokeUrl
+) => {
+  try {
+    let url = "";
+    url = `https://apricot-mole-2227.twil.io/invite-friend?phoneNumber=${phoneNumber}&firstName=${firstName}&brand=${brand}&otherName=${otherName}&bespokeUrl=${bespokeUrl}`;
+    let response = await fetch(url, {
+      method: "GET",
+    });
+    let res = await response.json();
+    return res;
+  } catch (err) {
+    return err;
+  }
+};

@@ -8,6 +8,7 @@ export const botMessages = [
       message: "Hi. Welcome to your money saving robot, may I take your first name please?",
     },
   ],
+  
   [
     {
       type: "bot",
@@ -24,36 +25,6 @@ export const botMessages = [
       message:"What do you spend every month on food and drink? This includes dining out, coffee stops and takeaways... Tell the truth, we won't share any secrets we promise."
     }
   ],
-  [
-    {
-      type:"bot",
-      message:"What do you spend each month on your beauty and wellbeing please?"
-    }
-  ],
-  [
-    {
-      type:"bot",
-      message:"What do you spend each month on fashion shopping please?"
-    }
-  ],
-  [
-    {
-      type:"bot",
-      message:"What do you spend each month on your your home and interior design/decoration please?"
-    }
-  ],
-  [
-    {
-      type:"bot",
-      message:"What do you spend each month on tech and gadgets? Please include any subscription costs or mobile phone leases?"
-    }
-  ],
-  [
-    {
-      type:"bot",
-      message:"What's your monthly spend on entertainment? This includes music subscriptions, Spotify, Amazon & of course Netflix firstname..."
-    }
-  ]
 ];
 
 export const userMessages = [
@@ -122,35 +93,15 @@ export const userMessages = [
     benefit:0.25,
     placeholder: `£00.00`,
     maxLength: 7,
-  }
+  },
 ];
 export const registration_botMessages = [
-  [
-    {
-      type: "bot",
-      message: "I'm your new personal concierge.",
-    },
-    {
-      type: "bot",
-      message: "Your wish is my command.",
-    },
-    {
-      type: "bot",
-      message:
-        "I'm going to credit you membership access for 30 days so you can have a look around, to start saving time and money.",
-    },
-    {
-      type: "bot",
-      message: "May I take your first name please?",
-    },
-  ],
   [
     {
       type: "bot",
       message: "What is your date of birth?",
     },
   ],
-
   [
     {
       type: "bot",
@@ -165,13 +116,6 @@ export const registration_botMessages = [
   ],
 ];
 export const registration_userMessages = [
-  {
-    type: "user",
-    inputType: "input",
-    key: "firstname",
-    placeholder: "First Name Only",
-    isNext: true,
-  },
   {
     type: "user",
     inputType: "date",

@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import MessageList from "./MessageList";
 import { connect } from "react-redux";
-import { saveRetailers } from "../redux/actions";
+import { saveRetailers,saveBrand } from "../redux/actions";
 import Firebase from "../firebasehelper";
 import { FadeLoader } from "react-spinners";
 import Header from "./Header";
@@ -42,7 +42,9 @@ class Screen extends React.Component {
     document.getElementsByTagName("head")[0].appendChild(link);
     Firebase.getAllRetailers((res) => {
       const retailers = res || [];
+      console.log("retailers",retailers);
       Firebase.getAllDeactiveRetailers((res) => {
+        console.log("deactive",res);
         let deactive = [];
         if (res) deactive = res;
         let result = {};
@@ -51,6 +53,9 @@ class Screen extends React.Component {
         this.props.dispatch(saveRetailers(result));
       });
     });
+    Firebase.getBrandDataByName(name).then(res=>{
+        this.props.dispatch(saveBrand(res));
+    })
   }
   render() {
     const {

@@ -2,28 +2,18 @@ import React, { Component, Fragment } from "react";
 import Select from "./Select";
 import ToggleButton from "./ToggleButton";
 import YesNoButton from "./YesNoButton";
-import CardContainer from "./CardContainer";
-import { connect } from "react-redux";
 import DateInput from "./DateInput";
+import InviteInput from "./InviteInput";
+import { connect } from "react-redux";
 import { doSMS, clearZero } from "../functions/Auth";
-import { FadeLoader } from "react-spinners";
-import { css } from "@emotion/core";
+
+
 import { animateScroll } from "react-scroll";
 import Firebase from "../firebasehelper";
 import ErrorModal from "./ErrorModal";
-import {filterRetailers} from "../functions/index";
 
-const override = css`
-  position: absolute;
-  top: 48%;
-  left: 48%;
-  radius: 2px;
-  height: 15px;
-  width: 5px;
-  display: block;
-  margin: 0 auto;
-  border-color: grey;
-`;
+
+
 
 let profile = {};
 class MessageInput extends Component {
@@ -245,36 +235,36 @@ class MessageInput extends Component {
   getYesNoInput() {
     return <YesNoButton setSelectedOption={this.chooseOption} />;
   }
-  getCardInput() {
-    const { addMessage, message,retailers,getBotMessageGroup } = this.props;
-    let retailerType = message.retailerType;
-    let retailers_data = retailers.all;
-    let deactive = retailers.deactive;
-    console.log("retailers_data",retailers_data);
-    let cards = [];
-    if(retailers_data){
-      let result = filterRetailers(retailers_data,deactive,retailerType);
-      if(result.length){
-        cards = result.map(item=>{
-          let name = item.retailerName;
-          let image = item.logo;
-          return {name,image};
-        });
-        cards.splice(6);
-      }
-    }
-    
-    if(!retailers_data)
-    return <FadeLoader
-            css={override}
-            sizeUnit={"px"}
-            size={100}
-            loading={true}
-          />
-    else
+  getDateMessage() {
+    const { addMessage, logo, message } = this.props;
     return (
-      <CardContainer addMessage={addMessage} cards={cards} message={message} getBotMessageGroup={getBotMessageGroup} />
+      <DateInput addMessage={this.addDate} logo={logo} message={message} />
     );
+  }
+  getInviteMessage(){
+    const { addMessage, message } = this.props;
+    return (
+      <InviteInput addMessage={this.addInvitation} message={message} />
+    );
+  }
+  addDate = (date) => {
+    const { addMessage, message } = this.props;
+    profile[message.key] = date;
+    let status = profile["addressType"];
+    addMessage({
+      message: date,
+      status: status,
+      ...message,
+    });
+  };
+  addInvitation = (friend) =>{
+    const { addMessage, message } = this.props;
+    profile[message.key] = friend;
+    addMessage({
+      profile:profile,
+      message: `I want to invite ${friend.firstname}.`,
+      ...message,
+    });
   }
   onChangeBillPrice = ({ target: { value } }) => {
     let newValue = value.split(".");
@@ -519,8 +509,9 @@ class MessageInput extends Component {
           >
             {message.inputType === "static" ? this.getStaticMessage() : null}
             {message.inputType === "input" ? this.getInputMessage() : null}
+            {message.inputType === "invite" ? this.getInviteMessage() : null}
+            {message.inputType === "date" ? this.getDateMessage() : null}
             {message.inputType === "select" ? this.getSelectInput() : null}
-            {message.inputType === "card" ? this.getCardInput() : null}
             {message.inputType === "yesno" ? this.getYesNoInput() : null}
             {message.inputType === "upload" ? this.getUploadDialog() : null}
             {message.inputType === "toggleButton"

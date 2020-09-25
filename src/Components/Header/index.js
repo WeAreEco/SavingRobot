@@ -33,16 +33,9 @@ class Header extends React.Component {
               }}
             >
             </button> 
-            {this.props.firstname && <div className="user_section">
-                <button type="button" className="btn saving">
-                    <span className="badge badge-pill">£{this.props.totalsaving}</span>
-                </button>
-                <button type="button" className="btn user" >
-                  <i className="fas fa-user"></i>
-                  <span className="badge badge-pill">{this.props.firstname}</span>
-                </button>
-            </div>}
-            
+            <button type="button" className="btn saving">
+                <span className="badge badge-pill">Monthly saving £{this.props.totalsaving}</span>
+            </button>
           </div>
         </div>
       </header>

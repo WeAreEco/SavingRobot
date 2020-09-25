@@ -5,18 +5,15 @@
 	flex-direction: row;
 	flex-wrap: wrap;
 	width: 100%;
-	cursor: pointer;
+	margin-bottom: 43px;
 	@media only screen and (max-width: 768px) {
 		width: 100%;
 		margin-top: 0px;
 	}
-	@media only screen and (min-width: 768px) {
-		margin-top: 50px;
-	}
 	.card-wrapper {
 		box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.32);
 		position: relative;
-		border-radius: 18px;
+		border-radius: 13px;
 		background-color: $white;
 		display: flex;
 		margin: 10px auto;

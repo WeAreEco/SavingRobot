@@ -13,6 +13,7 @@ export const getInputTimeoutValue = () => {
 };
 
 export const getBotMessageGroup = () => {
+  console.log("botMessages",botMessages);
   return botMessages.shift();
 };
 

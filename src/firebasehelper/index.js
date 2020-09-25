@@ -196,11 +196,12 @@ class Firebase {
         });
     });
   };
-  static signup = (profile, brand) => {
-    console.log("profile", profile);
-    const { phonenumber } = profile;
+  static addFriend = (firstname, phonenumber, brand) => {
+    console.log("brand_name",brand);
+    console.log("firstname",firstname);
+    console.log("phonenumber",phonenumber);
     return new Promise((resolve, reject) => {
-      if (brand !== "ecosystem") {
+      if (brand !== "Ecosystem") {
         firebase
           .firestore()
           .collection(`${brand}`)
@@ -209,7 +210,112 @@ class Firebase {
           .where("phonenumber", "==", phonenumber)
           .get()
           .then((snapshot) => {
-            console.log("snapshot", snapshot);
+            if (!snapshot.size) {
+              firebase
+                .firestore()
+                .collection(`${brand}`)
+                .doc("data")
+                .collection("user")
+                .add({
+                  firstname,
+                  phonenumber,
+                  tokens: 300,
+                })
+                .then((user) => {
+                  resolve(user);
+                })
+                .catch(() => {
+                  reject(null);
+                });
+            } else resolve(null);
+          })
+          .catch(() => {
+            reject(null);
+          });
+      } else {
+        console.log("I am in");
+        firebase
+          .firestore()
+          .collection(`user`)
+          .where("phonenumber", "==", phonenumber)
+          .get()
+          .then((snapshot) => {
+            if (!snapshot.size) {
+              firebase
+                .firestore()
+                .collection(`user`)
+                .add({
+                  firstname,
+                  phonenumber,
+                  tokens: 300,
+                })
+                .then((user) => {
+                  resolve(user);
+                })
+                .catch((error) => {
+                  reject(error);
+                });
+            } else reject(null);
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      }
+    });
+  };
+  static updateUserById(uid, brand, data) {
+    return new Promise((resolve, reject) => {
+      let fbInstance;
+      if (brand === "Ecosystem") {
+        fbInstance = firebase.firestore().collection("user");
+      } else {
+        fbInstance = firebase
+          .firestore()
+          .collection(brand)
+          .doc("data")
+          .collection("user");
+      }
+      fbInstance.doc(`${uid}`).set(data, { merge: true });
+    });
+  }
+  static saveTokenHistory = (brand_name, uid, data) => {
+    return new Promise((resolve, reject) => {
+      let fbInstance;
+      if (brand_name === "Ecosystem") {
+        fbInstance = firebase.firestore().collection("user");
+      } else {
+        fbInstance = firebase
+          .firestore()
+          .collection(brand_name)
+          .doc("data")
+          .collection("user");
+      }
+
+      fbInstance
+        .doc(`${uid}`)
+        .collection("token_history")
+        .add(data)
+        .then((res) => {
+          resolve(res);
+        })
+        .catch((error) => {
+          reject(error);
+        });
+    });
+  };
+
+  static signup = (profile, brand) => {
+    const { phonenumber } = profile;
+    return new Promise((resolve, reject) => {
+      if (brand !== "Ecosystem") {
+        firebase
+          .firestore()
+          .collection(`${brand}`)
+          .doc("data")
+          .collection("user")
+          .where("phonenumber", "==", phonenumber)
+          .get()
+          .then((snapshot) => {
             if (!snapshot.size) {
               firebase
                 .firestore()
@@ -235,11 +341,10 @@ class Firebase {
           .where("phonenumber", "==", phonenumber)
           .get()
           .then((snapshot) => {
-            console.log("snapshot", snapshot);
             if (!snapshot.size) {
               firebase
                 .firestore()
-                .collection(`${brand}`)
+                .collection("user")
                 .add(profile)
                 .then((res) => {
                   resolve(res);
