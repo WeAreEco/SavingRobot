@@ -8,7 +8,6 @@ export const botMessages = [
       message: "Hi. Welcome to your money saving robot, may I take your first name please?",
     },
   ],
-  
   [
     {
       type: "bot",

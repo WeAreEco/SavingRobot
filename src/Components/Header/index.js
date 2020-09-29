@@ -1,6 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
-import logo from "../../images/ecosystem_logo.png";
+import ecosystem_logo from "../../images/ecosystem_logo.png";
 import "./index.css";
 class Header extends React.Component {
   constructor(props) {
@@ -14,6 +14,7 @@ class Header extends React.Component {
   }
 
   render() {
+    const {name,logo} = this.props;
     return (
       <header id="page-header">
         <div className="content-header">
@@ -21,7 +22,7 @@ class Header extends React.Component {
             <button
               className="header-logo"
               style={{
-                backgroundImage: `url(${logo})`,
+                backgroundImage: `url(${name==="Ecosystem"?ecosystem_logo:logo})`,
                 backgroundRepeat: "no-repeat",
                 backgroundPosition: "center",
                 backgroundSize: "contain",

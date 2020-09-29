@@ -1,6 +1,7 @@
-export const filterRetailers = (retailers,deactive,tag)=> {
+export const filterRetailers = (retailers,deactive,tag,territory)=> {
+  console.log("territory",territory);
     let filteredRetailerKeys = Object.keys(retailers).filter(
-        (obj) => !deactive[obj]
+        (obj) => !deactive[obj]&&retailers[obj].territory===territory
       );
       if (tag) {
         filteredRetailerKeys = filteredRetailerKeys.filter((key) => {

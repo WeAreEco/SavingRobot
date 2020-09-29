@@ -43,12 +43,13 @@ class Screen extends React.Component {
     Firebase.getAllRetailers((res) => {
       const retailers = res || [];
       Firebase.getAllDeactiveRetailers((res) => {
-        console.log("deactive",res);
         let deactive = [];
         if (res) deactive = res;
         let result = {};
         result.all = retailers;
         result.deactive = deactive;
+        console.log("retailers",retailers);
+        console.log("deactive",deactive);
         this.props.dispatch(saveRetailers(result));
       });
     });
@@ -66,7 +67,7 @@ class Screen extends React.Component {
     const { name, icon, logo } = this.props;
     return (
       <div>
-      <Header></Header>
+      <Header name={name} logo={logo}></Header>
       <div className="app-wrapper"> 
         <div style={{height:70}}></div>
         {loading && (

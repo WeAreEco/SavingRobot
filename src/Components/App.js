@@ -42,7 +42,7 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      loading: false,
+      loading: true,
       brands: [],
       fromMobile: false,
     };
@@ -74,9 +74,8 @@ class App extends Component {
           size={100}
           loading={loading}
         />
-
-        {!loading && (
           <Switch>
+          {!loading && (
             <Route
               exact
               path="/"
@@ -88,8 +87,8 @@ class App extends Component {
                   icon={bolt_icon}
                 />
               )}
-            />
-            {brands.map((item, index) => {
+            />)}
+            {!loading &&brands.map((item, index) => {
               const { logo, name, icon } = item;
               let brand = name.replace(/\s/g, "");
               let path = "/" + brand;
@@ -110,7 +109,6 @@ class App extends Component {
               );
             })}
           </Switch>
-        )}
       </Fragment>
     );
   }
