@@ -1,11 +1,18 @@
 import React, { Component } from "react";
+import ReactSelect from "react-select";
+import { clearZero } from "../functions/Auth";
+const countryCodeOptions = [
+  { value: "+44", label: "+44" },
+  { value: "+1", label: "+1" },
+];
 
 class InviteInput extends Component {
   constructor(props) {
     super(props);
     this.state = {
       phone: "",
-      firstname:""
+      firstname:"",
+      countryCode: { value: "+44", label: "+44" },
     };
   }
   onChange = (e) => {
@@ -18,8 +25,11 @@ class InviteInput extends Component {
     if (phone && firstname) return true;
     else return false;
   };
+  handleCountryCode = (countryCode) => {
+    this.setState({ countryCode });
+  };
   render() {
-    const { phone,firstname } = this.state;
+    const { phone,firstname,countryCode } = this.state;
     return (
         <div
         className="message-input-container"
@@ -38,13 +48,28 @@ class InviteInput extends Component {
             value={firstname}
             onChange={this.onChange}
           />
-          <input
-            name="phone"
-            placeholder="+44"
-            width="100%"
-            value={phone}
-            onChange={this.onChange}
-          />
+          <div className="message-input-container">
+              <ReactSelect
+                  value={countryCode}
+                  onChange={this.handleCountryCode}
+                  options={countryCodeOptions}
+                  styles={{
+                    control: (styles) => ({
+                      ...styles,
+                      backgroundColor: "white",
+                      width: 80,
+                      marginLeft: 10,
+                    }),
+                  }}
+                />
+                <input
+                  type="text"
+                  name="phone"
+                  className="phone"
+                  value={phone}
+                  onChange = {this.onChange}
+                />
+          </div>
         </div>
         <div
           className={`send-button ${this.isFull() ? "" : "disabled"}`}
@@ -72,10 +97,11 @@ class InviteInput extends Component {
   }
   addMessage = ()=>{
     const { addMessage, message } = this.props;
-    const { firstname,phone } = this.state;
+    let { firstname,phone } = this.state;
     let profile = {};
     profile.firstname = firstname;
-    profile.phone = phone;
+    phone = clearZero(phone);
+    profile.phone = this.state.countryCode.value + phone;
     addMessage(profile);
   }
 }

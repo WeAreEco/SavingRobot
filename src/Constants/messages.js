@@ -15,6 +15,7 @@ export const botMessages = [
       message: "Would you like to find out how much money you will save on your spending across all walks of life?",
     },
   ],
+
   [
     {
       type:"bot",

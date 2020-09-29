@@ -34,7 +34,7 @@ class Header extends React.Component {
             >
             </button> 
             {this.props.totalsaving!==0 && <button type="button" className="btn saving">
-                <span className="badge badge-pill">Monthly saving £{this.props.totalsaving}</span>
+                Monthly saving £{this.props.totalsaving}
             </button>}
             {this.props.totalsaving===0 && this.props.firstname && <button type="button" className="btn" >
                   <i className="fas fa-user"></i>

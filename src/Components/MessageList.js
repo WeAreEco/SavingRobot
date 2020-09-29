@@ -127,7 +127,44 @@ class MessageList extends Component {
       });
     }
   }
-
+  isFirstLandingonSaving = (profile)=>{
+    let token_history = profile.token_history;
+    if(token_history){
+      let val = token_history.find(item=>item.type==="savingrobot");
+      if(val)
+        return false;
+      else
+        return true;
+    }
+    else{
+      return true;
+    }
+      
+  }
+  is_alreadyFriendAdded = (friend_list,friend) =>{
+    const {brand} = this.state;
+    return new Promise((resolve,reject)=>{
+        if(friend_list){
+          let promises = friend_list.map(async item=>{
+            let uid = item.uid;
+            let profile = await Firebase.getProfileByUID(uid,brand);
+            return profile.phonenumber;
+          });
+          Promise.all(promises).then(res=>{
+            console.log("phone number list",res);
+            if(res.includes(friend.phone))
+                resolve(true);
+            else
+                resolve(false);
+          }).catch(error=>{
+            reject(error);
+          })
+        }
+        else{
+            resolve(false);
+        }
+    });
+  }
   setMessages() {
     const { logo, icon,retailers } = this.props;
     const { messages } = this.state;
@@ -179,7 +216,6 @@ class MessageList extends Component {
     this.setState({ messages });
   }
   invite = (friend)=>{
-
     console.log("invite phone",friend.phone);
     const {profile} = this.state;
     addBotMessages([
@@ -195,7 +231,7 @@ class MessageList extends Component {
     this.getBotMessageGroup();
   }
   addMessage = async (message) => {
-    const { brand, uid, profile } = this.state;
+    const { brand, uid, profile,friends } = this.state;
     let {totalsaving,retailers} = this.props;
     if (message.inputType === "input" && message.key === "firstname") {
       setTimeout(() => {
@@ -277,33 +313,71 @@ class MessageList extends Component {
       let is_member = message.is_member;
       if (is_member) {
         this.setState({loading:true});
-        Firebase.getProfile(phone, brand).then((res) => {
+        Firebase.getProfile(phone, brand).then(async (res) => {
           this.setState({loading:false});
           if (res) {
             this.setState({ uid: res.id });
-            this.setState({ profile: res.data() });
-            if(res.data().friends)
-              this.setState({friends: res.data().friends});
-            console.log("profile",res.data());
+            this.setState({ profile: res});
+            if(res.friends)
+              this.setState({friends: res.friends});
             addUserMessage({
               type: "user",
               inputType: "yesno",
               key: "is_invite",
             });
-            addBotMessageGroup([
-              {
-                type: "bot",
-                message: "Great! You are successfully logged in.",
-              },
-              {
-                type: "bot",
-                message: `Currently you have ${res.data().tokens} tokens in your wallet `+profile.firstname+"...",
-              },
-              {
-                type: "bot",
-                message: "Would you like to share your saving result with friends "+profile.firstname+"? You’ll earn £5 in tokens per friend.",
-              },
-            ]);
+            if(this.isFirstLandingonSaving(res)){
+                addBotMessageGroup([
+                  {
+                    type: "bot",
+                    message: "Great! You are successfully logged in.",
+                  },
+                  {
+                    type: "bot",
+                    message: `Currently you have ${res.tokens} tokens in your account `+profile.firstname+`, which is equivalent to £${(res.tokens/100).toFixed(2)}.`,
+                  },
+                  {
+                    type: "bot",
+                    message: `Here’s £10 in tokens, to help you start saving.`,
+                  },
+                  {
+                    type: "bot",
+                    message: `You now have ${res.tokens + 1000 } tokens in your account, which is equivalent to £${((res.tokens + 1000)/100).toFixed(2)}.`,
+                  },
+                  {
+                    type: "bot",
+                    message: "Would you like to share your saving result with friends "+profile.firstname+"? You’ll earn £5 in tokens per friend.",
+                  },
+                  
+                ]);
+            
+                let tokens =(res.tokens|| 0) + 1000;
+                profile.tokens = tokens;
+                this.setState({profile});
+                Firebase.updateUserById(res.id, brand, {
+                  tokens: tokens,
+                });
+                await Firebase.saveTokenHistory(brand, res.id, {
+                  created: new Date(),
+                  amount: 1000,
+                  type: "savingrobot",
+                });
+            }
+            else{
+              addBotMessageGroup([
+                {
+                  type: "bot",
+                  message: "Great! You are successfully logged in.",
+                },
+                {
+                  type: "bot",
+                  message: `Currently you have ${res.tokens} tokens in your account `+profile.firstname+`, which is equivalent to £${(res.tokens/100).toFixed(2)}.`,
+                },
+                {
+                  type: "bot",
+                  message: "Would you like to share your saving result with friends "+profile.firstname+"? You’ll earn £5 in tokens per friend.",
+                },
+              ]);
+            }
             this.getBotMessageGroup();
           } else
             this.setState({
@@ -319,9 +393,8 @@ class MessageList extends Component {
           firstname: profile.firstname,
           phonenumber: profile.phonenumber,
         };
-        console.log("newprofile",new_profile);
         this.signup(new_profile)
-          .then((res) => {
+          .then(async (res) => {
             this.setState({loading:false});
             if (res) {
               const uid = res.id;
@@ -338,9 +411,29 @@ class MessageList extends Component {
                   },
                   {
                     type: "bot",
+                    message: `Currently you have 0 tokens in your account.`,
+                  },
+                  {
+                    type: "bot",
+                    message: `Here’s £10 in tokens, to help you start saving.`,
+                  },
+                  {
+                    type: "bot",
+                    message: `You now have 1000 tokens in your account, which is equivalent to £10.`,
+                  },
+                  {
+                    type: "bot",
                     message: "Would you like to share your saving result with friends "+profile.firstname+"? You’ll earn £5 in tokens per friend.",
                   },
                 ]);
+                Firebase.updateUserById(uid, brand, {
+                  tokens: 1000,
+                });
+                await Firebase.saveTokenHistory(brand, uid, {
+                  created: new Date(),
+                  amount: 1000,
+                  type: "savingrobot",
+                });
               this.getBotMessageGroup();
               
             } else {
@@ -374,48 +467,83 @@ class MessageList extends Component {
           key: "invite",
         });
       } else {
-        Firebase.updateUserById(uid, brand, {
-          tokens: (profile.tokens || 0) + 1000,
-        });
-        await Firebase.saveTokenHistory(brand, uid, {
-          created: new Date(),
-          amount: 1000,
-          type: "savingrobot",
-        });
         addBotMessageGroup([
           {
             type: "bot",
-            message: `Ok thanks ${profile.firstname}, here’s £10 in tokens, to help you start saving.`,
+            message: `Thank you.`,
           },
         ]);
-        
+        addUserMessage({
+          type: "user",
+          inputType: "static",
+          message: "Take me to my Ecosystem, to spend my tokens.",
+          key: "final",
+        });
       }
       this.getBotMessageGroup();
     } else if (message.key === "invite") {
       let friend = message.profile.invite;
-      try {
-        await this.addFriend(friend.firstname,friend.phone);
-        await Firebase.saveTokenHistory(brand, uid, {
-          created: new Date(),
-          amount: 500,
-          type: "invite",
-        });
+      let already_added = await this.is_alreadyFriendAdded(friends,friend);
+      if(already_added){
         addBotMessageGroup([
           {
             type: "bot",
-            message: `Ok thanks ${profile.firstname}, you've earned £5 in tokens.`,
+            message: `Sorry, ${friend.firstname} is already your friend.`,
           },
-          {
-            type: "bot",
-            message: `Here’s £10 in tokens, to help you start saving.`,
-          }
         ]);
+        addUserMessage({
+          type: "user",
+          inputType: "static",
+          message: "Take me to my Ecosystem, to spend my tokens.",
+          key: "final",
+        });
         this.getBotMessageGroup();
-      } catch (error) {
-        alert(
-          "You cannot invite this user because this phone number is already used."
-        );
       }
+      else{
+        try {
+            await this.addFriend(friend.firstname,friend.phone);
+            await Firebase.saveTokenHistory(brand, uid, {
+              created: new Date(),
+              amount: 500,
+              type: "invite",
+            });
+            addBotMessageGroup([
+              {
+                type: "bot",
+                message: `Currently you have ${profile.tokens} tokens in your account.`,
+              },
+              {
+                type: "bot",
+                message: `You've earned £5 in tokens.`,
+              },
+              {
+                type: "bot",
+                message: `You now have ${profile.tokens+500} tokens in your account, which is equivalent to £${((profile.tokens+500)/100).toFixed(2)}.`,
+              },
+            ]);
+            // addUserMessage({
+            //   type: "user",
+            //   inputType: "static",
+            //   message: "Take me to my Ecosystem, to spend my tokens.",
+            //   key: "final",
+            // });
+            let tokens =profile.tokens + 500;
+            profile.tokens = tokens;
+            this.setState({profile});
+            Firebase.updateUserById(uid, brand, {
+              tokens: tokens,
+            });
+            await Firebase.saveTokenHistory(brand, uid, {
+              created: new Date(),
+              amount: 500,
+              type: "invite",
+            });
+            this.getBotMessageGroup();
+          } catch (error) {
+            console.log("error",error);
+          }
+      }
+     
     }
     else if(message.key === "bill-price"){
       let profile = message.profile;
@@ -424,8 +552,8 @@ class MessageList extends Component {
 
       let money = profile[category];
       console.log("money",money);
-      let weekly_save = financial(money*benefit);
-      let monthly_save =financial(weekly_save*4);
+      let monthly_save = financial(money*benefit);
+      let weekly_save =financial(monthly_save/4);
       let tot_save = financial(Number.parseFloat(totalsaving)+Number.parseFloat(monthly_save));
       
       this.props.dispatch(saveTotalSaving(tot_save));
@@ -433,16 +561,23 @@ class MessageList extends Component {
       let retailers_data = retailers.all;
       let deactive = retailers.deactive;
       let cards = [];
-      console.log("retailers_data",retailers_data);
       if(retailers_data){
         let result = filterRetailers(retailers_data,deactive,category);
         if(result.length){
-          cards = result.map(item=>{
+          let top_10_cards = [];
+          let common_cards = [];
+          result.map(item=>{
             let name = item.retailerName;
             let image = item.logo;
-            return {name,image};
+            let top10 = item.top10;
+            if(top10<21 && top10!=="none")
+              top_10_cards.push({name,image,top10});
+            else
+              common_cards.push({name,image,top10});
           });
+          cards = top_10_cards.concat(common_cards);
           cards.splice(6);
+          console.log("cards",cards);
         }
       }
       if(cards.length!==0){
@@ -517,15 +652,11 @@ class MessageList extends Component {
     const { uid,friends,profile } = this.state;
     const {brand} = this.props;
     let brand_name = brand.name;
-    console.log("brand",brand);
-    console.log("uid",uid);
-    console.log("friends",friends);
-    console.log("profile",profile);
     return new Promise((resolve,reject)=>{
       Firebase.addFriend(firstname, phonenumber, brand_name)
-      .then((newUser) => {
-        const newID = newUser.id;
-        console.log("newID",newID);
+      .then((friend) => {
+        console.log("friend",friend);
+        const friend_id = friend.id;
         Firebase.updateUserById(uid, brand.name, {
           friends: [
             ...friends.map((friend) => ({
@@ -533,18 +664,16 @@ class MessageList extends Component {
               firstname: friend.firstname,
             })),
             {
-              uid: newID,
+              uid: friend_id,
               firstname: firstname,
             },
           ],
           tokens: (profile.tokens || 0) + 500,
         });
-        resolve(newUser);
-        //localStorage.setItem("profile", JSON.stringify(newProfile));
+        resolve(friend);
         inviteFriend(firstname, profile.firstname, brand.name, phonenumber,brand.bespokeUrl);
       })
       .catch((error) => {
-        console.log("error",error);
         reject(error);
       });
     })

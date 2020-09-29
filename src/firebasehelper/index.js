@@ -210,7 +210,7 @@ class Firebase {
           .where("phonenumber", "==", phonenumber)
           .get()
           .then((snapshot) => {
-            if (!snapshot.size) {
+            if (snapshot.empty) {
               firebase
                 .firestore()
                 .collection(`${brand}`)
@@ -224,38 +224,45 @@ class Firebase {
                 .then((user) => {
                   resolve(user);
                 })
-                .catch(() => {
-                  reject(null);
+                .catch((error) => {
+                  reject(error);
                 });
-            } else resolve(null);
+            } else{
+              let doc = snapshot.docs[0];
+              resolve(doc.data());
+            } 
           })
-          .catch(() => {
-            reject(null);
+          .catch((error) => {
+            reject(error);
           });
       } else {
-        console.log("I am in");
         firebase
           .firestore()
           .collection(`user`)
           .where("phonenumber", "==", phonenumber)
           .get()
           .then((snapshot) => {
-            if (!snapshot.size) {
-              firebase
-                .firestore()
-                .collection(`user`)
-                .add({
-                  firstname,
-                  phonenumber,
-                  tokens: 300,
-                })
-                .then((user) => {
-                  resolve(user);
-                })
-                .catch((error) => {
-                  reject(error);
-                });
-            } else reject(null);
+              if(snapshot.empty){
+                   firebase
+                    .firestore()
+                    .collection(`user`)
+                    .add({
+                      firstname,
+                      phonenumber,
+                      tokens: 300,
+                    })
+                    .then((user) => {
+                      resolve(user);
+                    })
+                    .catch((error) => {
+                      reject(error);
+                    });
+              }else{
+                let doc = snapshot.docs[0];
+                let friend = doc.data();
+                friend.uid = doc.id;
+                resolve(friend);
+              }
           })
           .catch((error) => {
             reject(error);
@@ -264,6 +271,10 @@ class Firebase {
     });
   };
   static updateUserById(uid, brand, data) {
+    console.log("in updateUserById");
+    console.log("uid",uid);
+    console.log("brand",brand);
+    console.log("data",data);
     return new Promise((resolve, reject) => {
       let fbInstance;
       if (brand === "Ecosystem") {
@@ -303,7 +314,27 @@ class Firebase {
         });
     });
   };
-
+  static getTokenHistory = (brand_name, uid) => {
+    return new Promise((resolve,reject)=>{
+      let fbInstance;
+      if (brand_name === "Ecosystem") {
+        fbInstance = firebase.firestore().collection("user");
+      } else {
+        fbInstance = firebase
+          .firestore()
+          .collection(brand_name)
+          .doc("data")
+          .collection("user");
+      }
+  
+      fbInstance
+        .doc(`${uid}`)
+        .collection("token_history")
+        .onSnapshot((res) => {
+          resolve(res.docs.map((obj) => obj.data()));
+        });
+    });
+  };
   static signup = (profile, brand) => {
     const { phonenumber } = profile;
     return new Promise((resolve, reject) => {
@@ -373,9 +404,15 @@ class Firebase {
           .where("phonenumber", "==", phonenumber)
           .limit(1)
           .get()
-          .then((res) => {
+          .then(async (res) => {
             if (res.size === 0) resolve(false);
-            else resolve(res.docs[0]);
+            else{
+              let profile_data = res.docs[0].data();
+              let token_history = await Firebase.getTokenHistory(brand,res.docs[0].id);
+              profile_data.id = res.docs[0].id;
+              profile_data.token_history = token_history;
+              resolve(profile_data);
+            } 
           })
           .catch((err) => {
             reject(err);
@@ -387,9 +424,15 @@ class Firebase {
           .where("phonenumber", "==", phonenumber)
           .limit(1)
           .get()
-          .then((res) => {
+          .then(async (res) => {
             if (res.size === 0) resolve(false);
-            else resolve(res.docs[0]);
+            else{
+              let profile_data = res.docs[0].data();
+              let token_history = await Firebase.getTokenHistory(brand,res.docs[0].id);
+              profile_data.id = res.docs[0].id;
+              profile_data.token_history = token_history;
+              resolve(profile_data);
+            } 
           })
           .catch((err) => {
             reject(err);

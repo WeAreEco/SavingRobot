@@ -42,7 +42,6 @@ class Screen extends React.Component {
     document.getElementsByTagName("head")[0].appendChild(link);
     Firebase.getAllRetailers((res) => {
       const retailers = res || [];
-      console.log("retailers",retailers);
       Firebase.getAllDeactiveRetailers((res) => {
         console.log("deactive",res);
         let deactive = [];

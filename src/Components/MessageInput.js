@@ -1,5 +1,6 @@
 import React, { Component, Fragment } from "react";
 import Select from "./Select";
+import ReactSelect from "react-select";
 import ToggleButton from "./ToggleButton";
 import YesNoButton from "./YesNoButton";
 import DateInput from "./DateInput";
@@ -7,12 +8,15 @@ import InviteInput from "./InviteInput";
 import { connect } from "react-redux";
 import { doSMS, clearZero } from "../functions/Auth";
 
-
+import { TerritoryOptions, CurrencyOptions } from "../Utils/Constants";
 import { animateScroll } from "react-scroll";
 import Firebase from "../firebasehelper";
 import ErrorModal from "./ErrorModal";
 
-
+const countryCodeOptions = [
+  { value: "+44", label: "+44" },
+  { value: "+1", label: "+1" },
+];
 
 
 let profile = {};
@@ -34,6 +38,7 @@ class MessageInput extends Component {
       email: "",
       password: "",    
     },
+    countryCode: { value: "+44", label: "+44" },
   };
   handleTouchStart = false;
 
@@ -86,8 +91,8 @@ class MessageInput extends Component {
   }
 
   getInputMessage() {
-    const { value, isFocused, checking_phone } = this.state;
-    const { message, logo, isIphoneX, addMessage } = this.props;
+    const { value, checking_phone,countryCode } = this.state;
+    const { message, logo, isIphoneX, addMessage,territory = TerritoryOptions[0] } = this.props;
     return (
       <div className="message-input-outer">
         {message.key === "sms" && (
@@ -107,7 +112,21 @@ class MessageInput extends Component {
           </div>
         )}
         <div className="message-input-container">
-          {message.key.includes("phone") && <p>+44</p>}
+          {message.key.includes("phone") && (
+              <ReactSelect
+                value={countryCode}
+                onChange={this.handleCountryCode}
+                options={countryCodeOptions}
+                styles={{
+                  control: (styles) => ({
+                    ...styles,
+                    backgroundColor: "white",
+                    width: 80,
+                    marginLeft: 10,
+                  }),
+                }}
+              />
+            )}
           <input
             type="text"
             value={value}
@@ -266,6 +285,11 @@ class MessageInput extends Component {
       ...message,
     });
   }
+
+  handleCountryCode = (countryCode) => {
+    this.setState({ countryCode });
+  };
+
   onChangeBillPrice = ({ target: { value } }) => {
     let newValue = value.split(".");
     if (newValue.length > 1) {
@@ -372,7 +396,7 @@ class MessageInput extends Component {
       }
     } else if (message.key === "phone") {
         let number = clearZero(value);
-        let phone = "+44" + number;
+        let phone = this.state.countryCode.value + number;
         if (profile["is_member"] === "No") {
           let pin = this.createPincode();
           pin = pin.toString();
@@ -393,6 +417,7 @@ class MessageInput extends Component {
         } else {
           this.setState({ checking_phone: true });
           let profile = await Firebase.getProfile(phone, logo);
+          console.log("phone profile",profile);
           this.setState({ checking_phone: false });
           if (profile) {
             let pin = this.createPincode();

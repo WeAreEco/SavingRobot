@@ -2,6 +2,7 @@ import React, { Component, Fragment } from "react";
 import { BrowserRouter as Router, Route, Link, Switch } from "react-router-dom";
 import { FadeLoader } from "react-spinners";
 import Screen from "./Screen";
+import Firebase from "../firebasehelper";
 import { css } from "@emotion/core";
 
 const isJSON = (str) => {
@@ -47,12 +48,12 @@ class App extends Component {
     };
   }
   componentDidMount() {
-    //this.setState({ loading: true });
-    //console.log("loading");
-    // Firebase.getAllBrands((res) => {
-    //   this.setState({ loading: false, brands: res });
-    //   console.log("loaded");
-    // });
+    this.setState({ loading: true });
+    console.log("loading");
+    Firebase.getAllBrands((res) => {
+      this.setState({ loading: false, brands: res });
+      console.log("loaded");
+    });
     let self = this;
     document.addEventListener("message", function (event) {
       if (isJSON(event.data)) {
@@ -88,7 +89,7 @@ class App extends Component {
                 />
               )}
             />
-            {/* {brands.map((item, index) => {
+            {brands.map((item, index) => {
               const { logo, name, icon } = item;
               let brand = name.replace(/\s/g, "");
               let path = "/" + brand;
@@ -107,7 +108,7 @@ class App extends Component {
                   )}
                 />
               );
-            })} */}
+            })}
           </Switch>
         )}
       </Fragment>
