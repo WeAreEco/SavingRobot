@@ -5,6 +5,7 @@ import ToggleButton from "./ToggleButton";
 import YesNoButton from "./YesNoButton";
 import DateInput from "./DateInput";
 import InviteInput from "./InviteInput";
+import ReactHtmlParser from "react-html-parser";
 import { connect } from "react-redux";
 import { doSMS, clearZero } from "../functions/Auth";
 
@@ -61,7 +62,7 @@ class MessageInput extends Component {
                 }}
                 key={i}
               >
-                {message.message}
+                {ReactHtmlParser(message.message)}
               </div>
             );
           })}
@@ -72,7 +73,7 @@ class MessageInput extends Component {
       <div
         className={`message message-static ${
           logo === "ecosystem" ? " " : "notbolt"
-        }`}
+        } ${message.key==="final"?"final":""}`} 
         onClick={() => {
           if (message.signup) {
             const signup_profile = {
@@ -85,7 +86,7 @@ class MessageInput extends Component {
           addMessage(message);
         }}
       >
-        {message.message}
+        {ReactHtmlParser(message.message)}
       </div>
     );
   }

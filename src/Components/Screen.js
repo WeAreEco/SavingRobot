@@ -48,8 +48,6 @@ class Screen extends React.Component {
         let result = {};
         result.all = retailers;
         result.deactive = deactive;
-        console.log("retailers",retailers);
-        console.log("deactive",deactive);
         this.props.dispatch(saveRetailers(result));
       });
     });
@@ -69,7 +67,7 @@ class Screen extends React.Component {
       <div>
       <Header name={name} logo={logo}></Header>
       <div className="app-wrapper"> 
-        <div style={{height:70}}></div>
+        <div style={{height:90}}></div>
         {loading && (
           <FadeLoader
             css={override}
