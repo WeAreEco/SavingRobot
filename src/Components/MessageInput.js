@@ -93,7 +93,8 @@ class MessageInput extends Component {
 
   getInputMessage() {
     const { value, checking_phone,countryCode } = this.state;
-    const { message, logo, isIphoneX, addMessage,territory = TerritoryOptions[0] } = this.props;
+    const { message, logo, isIphoneX, addMessage,brand } = this.props;
+    let territory = brand.territory?brand.territory:"UK";
     return (
       <div className="message-input-outer">
         {message.key === "sms" && (
@@ -131,7 +132,7 @@ class MessageInput extends Component {
           <input
             type="text"
             value={value}
-            placeholder={message.placeholder}
+            placeholder={`${message.key === "bill-price"?CurrencyOptions[territory]+"00.00":message.placeholder}`}
             className={`${message.key.includes("phone") ? "phone" : ""}
             ${message.key === "bill-price" ? "bill-price" : ""}
             `}
@@ -292,6 +293,9 @@ class MessageInput extends Component {
   };
 
   onChangeBillPrice = ({ target: { value } }) => {
+    const {brand} = this.props;
+    let territory = brand.territory?brand.territory:"UK";
+    console.log("territory",territory);
     let newValue = value.split(".");
     if (newValue.length > 1) {
       newValue =
@@ -311,7 +315,7 @@ class MessageInput extends Component {
       number = number / Math.pow(10, 2 - decimalPoints);
     }
     this.setState({
-      value: `£${number.toFixed(2)}`,
+      value: `${CurrencyOptions[territory]}${number.toFixed(2)}`,
     });
   };
   onChange = (e) => {
@@ -558,6 +562,7 @@ function mapDispatchToProps(dispatch) {
 function mapStateToProps(state) {
   return {
     retailers: state.retailers,
+    brand: state.brand
   };
 }
 export default connect(mapStateToProps, mapDispatchToProps)(MessageInput);

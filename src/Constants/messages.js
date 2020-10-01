@@ -46,7 +46,6 @@ export const userMessages = [
     key: "bill-price",
     category:"Food & Drink",
     benefit:0.2,
-    placeholder: `£00.00`,
     maxLength: 7,
   },
   {
@@ -55,7 +54,6 @@ export const userMessages = [
     key: "bill-price",
     category:"Beauty & Wellbeing",
     benefit:0.09,
-    placeholder: `£00.00`,
     maxLength: 7,
   },
   {
@@ -64,7 +62,6 @@ export const userMessages = [
     key: "bill-price",
     category:"Fashion",
     benefit:0.1,
-    placeholder: `£00.00`,
     maxLength: 7,
   },
   {
@@ -73,7 +70,6 @@ export const userMessages = [
     key: "bill-price",
     category:"Home",
     benefit:0.2,
-    placeholder: `£00.00`,
     maxLength: 7,
   },
   {
@@ -82,7 +78,6 @@ export const userMessages = [
     key: "bill-price",
     category:"Tech",
     benefit:0.15,
-    placeholder: `£00.00`,
     maxLength: 7,
   },
   {
@@ -91,7 +86,6 @@ export const userMessages = [
     key: "bill-price",
     category:"Entertainment",
     benefit:0.25,
-    placeholder: `£00.00`,
     maxLength: 7,
   },
 ];

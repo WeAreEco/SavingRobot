@@ -33,6 +33,7 @@ import {
 import { saveFirstname,saveTotalSaving } from "../redux/actions";
 import {financial,filterRetailers} from "../functions";
 import { clearZero, inviteFriend } from "../functions/Auth";
+import {  CurrencyOptions } from "../Utils/Constants";
 const override = css`
   position: absolute;
   top: 48%;
@@ -80,6 +81,7 @@ class MessageList extends Component {
       chatbot: {},
       loading:false,
       friends: [],
+      territory:"UK"
     };
   }
 
@@ -146,7 +148,6 @@ class MessageList extends Component {
   }
   is_alreadyFriendAdded = (friend_list,friend) =>{
     const {brand} = this.state;
-    console.log("brand",brand);
     return new Promise((resolve,reject)=>{
         if(friend_list){
           let promises = friend_list.map(async item=>{
@@ -221,7 +222,7 @@ class MessageList extends Component {
     this.setState({ messages });
   }
   addMessage = async (message) => {
-    const { brand, uid, profile,friends } = this.state;
+    const { brand, uid, profile,friends,territory } = this.state;
     let {totalsaving,retailers} = this.props;
     if (message.inputType === "input" && message.key === "firstname") {
       setTimeout(() => {
@@ -323,19 +324,19 @@ class MessageList extends Component {
                   },
                   {
                     type: "bot",
-                    message: `Currently you have ${res.tokens} tokens in your account `+profile.firstname+`, which is equivalent to £${(res.tokens/100).toFixed(2)}.`,
+                    message: `Currently you have ${res.tokens} tokens in your account `+profile.firstname+`, which is equivalent to ${CurrencyOptions[territory]}${(res.tokens/100).toFixed(2)}.`,
                   },
                   {
                     type: "bot",
-                    message: `Here’s £10 in tokens, to help you start saving.`,
+                    message: `Here’s ${CurrencyOptions[territory]}10 in tokens, to help you start saving.`,
                   },
                   {
                     type: "bot",
-                    message: `You now have ${res.tokens + 1000 } tokens in your account, which is equivalent to £${((res.tokens + 1000)/100).toFixed(2)}.`,
+                    message: `You now have ${res.tokens + 1000 } tokens in your account, which is equivalent to ${CurrencyOptions[territory]}${((res.tokens + 1000)/100).toFixed(2)}.`,
                   },
                   {
                     type: "bot",
-                    message: "Would you like to share your saving result with friends "+profile.firstname+"? You’ll earn £5 in tokens per friend.",
+                    message: "Would you like to share your saving result with friends "+profile.firstname+`? You’ll earn ${CurrencyOptions[territory]}5 in tokens per friend.`,
                   },
                   
                 ]);
@@ -360,11 +361,11 @@ class MessageList extends Component {
                 },
                 {
                   type: "bot",
-                  message: `Currently you have ${res.tokens} tokens in your account `+profile.firstname+`, which is equivalent to £${(res.tokens/100).toFixed(2)}.`,
+                  message: `Currently you have ${res.tokens} tokens in your account `+profile.firstname+`, which is equivalent to ${CurrencyOptions[territory]}${(res.tokens/100).toFixed(2)}.`,
                 },
                 {
                   type: "bot",
-                  message: "Would you like to share your saving result with friends "+profile.firstname+"? You’ll earn £5 in tokens per friend.",
+                  message: "Would you like to share your saving result with friends "+profile.firstname+`? You’ll earn ${CurrencyOptions[territory]}5 in tokens per friend.`,
                 },
               ]);
             }
@@ -405,15 +406,15 @@ class MessageList extends Component {
                   },
                   {
                     type: "bot",
-                    message: `Here’s £10 in tokens, to help you start saving.`,
+                    message: `Here’s ${CurrencyOptions[territory]}10 in tokens, to help you start saving.`,
                   },
                   {
                     type: "bot",
-                    message: `You now have 1000 tokens in your account, which is equivalent to £10.`,
+                    message: `You now have 1000 tokens in your account, which is equivalent to ${CurrencyOptions[territory]}10.`,
                   },
                   {
                     type: "bot",
-                    message: "Would you like to share your saving result with friends "+profile.firstname+"? You’ll earn £5 in tokens per friend.",
+                    message: "Would you like to share your saving result with friends "+profile.firstname+`? You’ll earn ${CurrencyOptions[territory]}5 in tokens per friend.`,
                   },
                 ]);
                 Firebase.updateUserById(uid, brand, {
@@ -502,11 +503,11 @@ class MessageList extends Component {
               addBotMessageGroup([
                 {
                   type: "bot",
-                  message: `You've earned £5 in tokens.`,
+                  message: `You've earned ${CurrencyOptions[territory]}5 in tokens.`,
                 },
                 {
                   type: "bot",
-                  message: `You now have ${profile.tokens+500} tokens in your account, which is equivalent to £${((profile.tokens+500)/100).toFixed(2)}.`,
+                  message: `You now have ${profile.tokens+500} tokens in your account, which is equivalent to ${CurrencyOptions[territory]}${((profile.tokens+500)/100).toFixed(2)}.`,
                 },
               ]);
               addUserMessage({
@@ -541,6 +542,7 @@ class MessageList extends Component {
       let category = message.category;
       let benefit = message.benefit;
       let territory = brand.territory?brand.territory:"UK";
+      this.setState({territory});
       let money = profile[category];
       console.log("money",money);
       let monthly_save = financial(money*benefit);
@@ -576,7 +578,7 @@ class MessageList extends Component {
           addBotMessageGroup([
             {
               type:"bot",
-              message:"Your Ecosystem will save you on average £"+weekly_save+" per week and £"+monthly_save+" per month with our friends, including:"
+              message:`Your Ecosystem will save you on average ${CurrencyOptions[territory]}`+weekly_save+` per week and ${CurrencyOptions[territory]}`+monthly_save+" per month with our friends, including:"
             },
             {
               type:"card",
@@ -599,7 +601,7 @@ class MessageList extends Component {
           addBotMessageGroup([
             {
               type:"bot",
-              message:"Your Ecosystem will save you on average £"+weekly_save+" per week and £"+monthly_save+" per month with our friends, including:"
+              message:`Your Ecosystem will save you on average ${CurrencyOptions[territory]}`+weekly_save+` per week and ${CurrencyOptions[territory]}`+monthly_save+" per month with our friends, including:"
             },
             {
               type:"card",

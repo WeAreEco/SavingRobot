@@ -1,5 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
+import { CurrencyOptions } from "../../Utils/Constants";
 import ecosystem_logo from "../../images/ecosystem_logo.png";
 import "./index.css";
 class Header extends React.Component {
@@ -14,7 +15,8 @@ class Header extends React.Component {
   }
 
   render() {
-    const {name,logo} = this.props;
+    const {name,logo,brand} = this.props;
+    let territory = brand.territory?brand.territory:"UK";
     return (
       <header id="page-header">
         <div className="content-header">
@@ -35,7 +37,7 @@ class Header extends React.Component {
             >
             </button> 
             {this.props.totalsaving!==0 && <button type="button" className="btn saving">
-                Monthly saving £{this.props.totalsaving}
+            Monthly saving {CurrencyOptions[territory]}{this.props.totalsaving}
             </button>}
             {this.props.totalsaving===0 && this.props.firstname && <button type="button" className="btn" >
                   <i className="fas fa-user"></i>
@@ -55,7 +57,8 @@ function mapDispatchToProps(dispatch) {
 function mapStateToProps(state) {
   return {
     firstname: state.firstname,
-    totalsaving: state.totalsaving
+    totalsaving: state.totalsaving,
+    brand:state.brand
   };
 }
 export default connect(mapStateToProps, mapDispatchToProps)(Header);

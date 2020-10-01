@@ -52,6 +52,7 @@ class Screen extends React.Component {
       });
     });
     Firebase.getBrandDataByName(name).then(res=>{
+        console.log("brand_data",res);
         this.props.dispatch(saveBrand(res));
     })
   }
