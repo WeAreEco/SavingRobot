@@ -11,3 +11,4 @@ You need Node.js v4.0+ to run these commands. Prefer using `yarn` over `npm`.
 # Firebase hosting deploy
 
 - `firebase deploy --only hosting:savingrobot`
+- deployed url: `https://savingrobot.io`
