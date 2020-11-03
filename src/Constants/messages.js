@@ -93,12 +93,6 @@ export const registration_botMessages = [
   [
     {
       type: "bot",
-      message: "What is your date of birth?",
-    },
-  ],
-  [
-    {
-      type: "bot",
       message: "Perfect. I need to verify your mobile number now please?",
     },
   ],
@@ -110,11 +104,6 @@ export const registration_botMessages = [
   ],
 ];
 export const registration_userMessages = [
-  {
-    type: "user",
-    inputType: "date",
-    key: "dob",
-  },
   {
     type: "user",
     inputType: "input",

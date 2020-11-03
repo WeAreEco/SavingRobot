@@ -219,7 +219,7 @@ class Firebase {
                 .add({
                   firstname,
                   phonenumber,
-                  tokens: 300,
+                  userstatus:"Pending"
                 })
                 .then((user) => {
                   resolve(user);
@@ -249,7 +249,7 @@ class Firebase {
                     .add({
                       firstname,
                       phonenumber,
-                      tokens: 300,
+                      userstatus:"Pending"
                     })
                     .then((user) => {
                       resolve(user);
@@ -830,6 +830,88 @@ class Firebase {
         });
     });
   };
+
+  // New DB functions
+  static getEcoUserbyId(eco_id) {
+    console.log("eco_id",eco_id);
+    return new Promise((resolve, reject) => {
+      return firebase
+        .firestore()
+        .collection("ecosystem_user")
+        .doc(eco_id)
+        .get()
+        .then((res) => {
+          resolve(res.data());
+        })
+        .catch((err) => {
+          reject(err);
+        });
+    });
+  }
+  static getAllEcoUsers() {
+    return new Promise((resolve, reject) => {
+      let users = Firebase.firestore()
+        .collection("ecosystem_user")
+        .get()
+        .then((snapshot) => {
+          return snapshot.docs.map((doc) => ({
+            ...doc.data(),
+            id: doc.id,
+          }));
+        });
+      resolve(users);
+    });
+  }
+  static updateEcoUser(eco_id, data) {
+    return firebase
+      .firestore()
+      .collection("ecosystem_user")
+      .doc(eco_id)
+      .set(data, { merge: true });
+  }
+  static isPNDuplicateInBrand(phonenumber,brand){
+    return new Promise((resolve, reject) => {
+      let fbInstance= firebase.firestore().collection(`${brand}`);
+      if(brand==="Ecosystem")
+        fbInstance=firebase.firestore().collection(`user`);
+
+      fbInstance.doc("data")
+      .collection("user")
+      .where("phonenumber", "==", phonenumber)
+      .limit(1)
+      .get()
+      .then((res) => {
+        if (res.size === 0) resolve(false);
+        else resolve(true);
+      })
+      .catch((err) => {
+        reject(err);
+      });
+    });
+  }
+  static getEcoUserbyPhonenumber(phonenumber) {
+    return new Promise((resolve, reject) => {
+      return firebase
+        .firestore()
+        .collection("ecosystem_user")
+        .where("phonenumber", "==", phonenumber)
+        .limit(1)
+        .get()
+        .then((res) => {
+          if (res.size === 0) resolve(false);
+          else resolve(res.docs[0]);
+        })
+        .catch((err) => {
+          reject(err);
+        });
+     }
+    );
+  }
+  static addEcosystemUser(profile) {
+    profile.renter_owner = profile.renter_owner || null;
+    console.log("added");
+    return firebase.firestore().collection("ecosystem_user").add(profile);
+  }
 }
 Firebase.initialize();
 export default Firebase;

@@ -309,6 +309,8 @@ class MessageList extends Component {
           if (res) {
             this.setState({ uid: res.id });
             this.setState({ profile: res});
+            let {tokens,tokenSpent} = res;
+            let current_token = tokenSpent?(tokens-tokenSpent)||0:tokens;
             if(res.friends)
               this.setState({friends: res.friends});
             addUserMessage({
@@ -324,7 +326,7 @@ class MessageList extends Component {
                   },
                   {
                     type: "bot",
-                    message: `Currently you have ${res.tokens} tokens in your account `+profile.firstname+`, which is equivalent to ${CurrencyOptions[territory]}${(res.tokens/100).toFixed(2)}.`,
+                    message: `Currently you have ${current_token} tokens in your account `+profile.firstname+`, which is equivalent to ${CurrencyOptions[territory]}${(current_token/100).toFixed(2)}.`,
                   },
                   {
                     type: "bot",
@@ -332,7 +334,7 @@ class MessageList extends Component {
                   },
                   {
                     type: "bot",
-                    message: `You now have ${res.tokens + 1000 } tokens in your account, which is equivalent to ${CurrencyOptions[territory]}${((res.tokens + 1000)/100).toFixed(2)}.`,
+                    message: `You now have ${current_token + 1000 } tokens in your account, which is equivalent to ${CurrencyOptions[territory]}${((current_token + 1000)/100).toFixed(2)}.`,
                   },
                   {
                     type: "bot",
@@ -341,7 +343,7 @@ class MessageList extends Component {
                   
                 ]);
             
-                let tokens =(res.tokens|| 0) + 1000;
+                tokens =(tokens|| 0) + 1000;
                 profile.tokens = tokens;
                 this.setState({profile});
                 Firebase.updateUserById(res.id, brand, {
@@ -361,7 +363,7 @@ class MessageList extends Component {
                 },
                 {
                   type: "bot",
-                  message: `Currently you have ${res.tokens} tokens in your account `+profile.firstname+`, which is equivalent to ${CurrencyOptions[territory]}${(res.tokens/100).toFixed(2)}.`,
+                  message: `Currently you have ${current_token} tokens in your account `+profile.firstname+`, which is equivalent to ${CurrencyOptions[territory]}${(current_token/100).toFixed(2)}.`,
                 },
                 {
                   type: "bot",
@@ -380,7 +382,6 @@ class MessageList extends Component {
       } else {
         this.setState({ profile, phone,loading:true });
         let new_profile = {
-          dob: profile.dob,
           firstname: profile.firstname,
           phonenumber: profile.phonenumber,
         };
@@ -634,9 +635,30 @@ class MessageList extends Component {
     this.setMessageInState(message);
     this.toggleUserInput();
   };
-  signup = (profile) => {
+  signup = async (profile) => {
+    const {phonenumber,firstname} = profile;
     const { brand } = this.state;
-    return Firebase.signup(profile, brand);
+    if(!await Firebase.isPNDuplicateInBrand(phonenumber,brand))
+    {
+      let eco_data = await Firebase.getEcoUserbyPhonenumber(phonenumber);
+      if(!eco_data){
+        let res = await Firebase.addEcosystemUser(profile);
+        let brand_member_profile = {
+          eco_id:res.id,
+          phonenumber,
+        }
+        await Firebase.signup(brand_member_profile,brand);
+      }
+      else{
+        let brand_member_profile = {
+          eco_id:eco_data.id,
+          phonenumber,
+        }
+        await Firebase.signup(brand_member_profile,brand);
+      }
+    }
+    else
+      alert(`Your phone number is already existing in ${brand}`)
   };
  
   addFriend = (firstname, phonenumber) => {
@@ -658,7 +680,6 @@ class MessageList extends Component {
               firstname: firstname,
             },
           ],
-          tokens: (profile.tokens || 0) + 500,
         });
         resolve(friend);
         inviteFriend(firstname, profile.firstname, brand.name, phonenumber,brand.bespokeUrl);
