@@ -349,7 +349,7 @@ class MessageList extends Component {
                 });
                 await Firebase.saveTokenHistory(brand, res.id, {
                   created: new Date(),
-                  amount: 1000,
+                  amount: -1000,
                   type: "savingrobot",
                 });
             }
@@ -422,7 +422,7 @@ class MessageList extends Component {
                 });
                 await Firebase.saveTokenHistory(brand, uid, {
                   created: new Date(),
-                  amount: 1000,
+                  amount: -1000,
                   type: "savingrobot",
                 });
               this.getBotMessageGroup();
@@ -495,11 +495,6 @@ class MessageList extends Component {
          else{
           try {
               await this.addFriend(friend.firstname,friend.phone);
-              await Firebase.saveTokenHistory(brand, uid, {
-                created: new Date(),
-                amount: 500,
-                type: "invite",
-              });
               addBotMessageGroup([
                 {
                   type: "bot",
@@ -524,7 +519,7 @@ class MessageList extends Component {
               });
               await Firebase.saveTokenHistory(brand, uid, {
                 created: new Date(),
-                amount: 500,
+                amount: -500,
                 type: "invite",
               });
               this.getBotMessageGroup();
