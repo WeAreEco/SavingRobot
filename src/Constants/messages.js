@@ -5,12 +5,6 @@ export const botMessages = [
   [
     {
       type: "bot",
-      message: "Hi. Welcome to your money saving robot, may I take your first name please?",
-    },
-  ],
-  [
-    {
-      type: "bot",
       message: "Would you like to find out how much money you will save on your spending across all walks of life?",
     },
   ],
@@ -28,13 +22,6 @@ export const botMessages = [
 ];
 
 export const userMessages = [
-  {
-    type: "user",
-    inputType: "input",
-    key: "firstname",
-    placeholder: "First Name Only",
-    isNext: true,
-  },
   {
     type: "user",
     inputType: "yesno",

@@ -6,6 +6,7 @@ import Firebase from "../firebasehelper";
 import { FadeLoader } from "react-spinners";
 import Header from "./Header";
 import { css } from "@emotion/core";
+import { parse } from "date-fns";
 
 const override = css`
   position: absolute;
@@ -25,13 +26,14 @@ class Screen extends React.Component {
     super(props);
     this.state = {
       restart: false,
-      loading: false,
+      loading: true,
       background: "#fff",
       services_routing: [],
     };
   }
   async componentDidMount() {
     const { name, icon } = this.props;
+    const parsed = new URLSearchParams(this.props.location.search);
     document.title = name;
     let link =
       document.querySelector("link[rel*='icon']") ||
@@ -55,6 +57,37 @@ class Screen extends React.Component {
         console.log("brand_data",res);
         this.props.dispatch(saveBrand(res));
     })
+    const parsed_uid = parsed.get("uid");
+
+    if (parsed_uid) {
+      let res = await Firebase.getProfileByUID(parsed_uid, name);
+      res.id = parsed_uid;
+      let token_history = await Firebase.getTokenHistory(name,parsed_uid)
+      if (res) {
+        const { eco_id } = res;
+        res.token_history = token_history;
+        if (eco_id) {
+          let eco_data = await Firebase.getEcoUserbyId(eco_id);
+          res = { ...res, ...eco_data };
+        }
+
+        this.setState({
+          profile: res,
+          uid: parsed_uid,
+          restart: true,
+          loading: false,
+          from_iframe:true
+        });
+       
+      } else {
+        alert("User is not existing.");
+        this.setState({ loading: false });
+        return;
+      }
+    }
+    else{
+      this.setState({ loading: false });
+    }
   }
   render() {
     const {
@@ -62,6 +95,7 @@ class Screen extends React.Component {
       profile,
       restart,
       loading,
+      from_iframe
     } = this.state;
     const { name, icon, logo } = this.props;
     return (
@@ -85,6 +119,7 @@ class Screen extends React.Component {
             restart={restart}
             uid={uid}
             profile={profile}
+            from_iframe={from_iframe}
           />
         )}
       </div>

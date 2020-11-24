@@ -1,7 +1,9 @@
 import React from "react";
 import { connect } from "react-redux";
 import { CurrencyOptions } from "../../Utils/Constants";
+import { postMessage } from "../../Utils/middleware";
 import ecosystem_logo from "../../images/ecosystem_logo.png";
+
 import "./index.css";
 class Header extends React.Component {
   constructor(props) {
@@ -34,6 +36,7 @@ class Header extends React.Component {
                 width: 180,
                 height: 60,
               }}
+              onClick={()=>postMessage('back_ecosystem', true)}
             >
             </button> 
             {this.props.totalsaving!==0 && <button type="button" className="btn saving">

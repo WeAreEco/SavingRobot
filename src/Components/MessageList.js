@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { animateScroll } from "react-scroll";
+
 import MessageItem from "./MessageItem";
 import MessageInput from "./MessageInput";
 import Firebase from "../firebasehelper";
@@ -8,6 +9,7 @@ import { connect } from "react-redux";
 import ReactHtmlParser from "react-html-parser";
 import { FadeLoader } from "react-spinners";
 import CardContainer from "./CardContainer";
+import { postMessage } from "../Utils/middleware";
 import { css } from "@emotion/core";
 import {
   getBotMessageGroup,
@@ -86,11 +88,31 @@ class MessageList extends Component {
   }
 
   componentDidMount() {
-    const { logo, restart, uid, profile } = this.props;
+    const { logo, restart, uid, profile,from_iframe } = this.props;
+    console.log("uid",uid);
+    console.log("profile",profile);
     this.setState({ brand: logo });
     if (restart) {
       this.setState({ uid: uid, profile: profile });
       this.restart();
+    }
+    if(!from_iframe){
+      addBotMessageGroup([
+        {
+          type: "bot",
+          message: "Hi. Welcome to your money saving robot, may I take your first name please?",
+        },
+      ]);
+      addUserMessage({
+        type: "user",
+        inputType: "input",
+        key: "firstname",
+        placeholder: "First Name Only",
+        isNext: true,
+      });
+    }
+    else{
+      this.props.dispatch(saveFirstname(profile.firstname));
     }
     this.getBotMessageGroup();
   }
@@ -215,7 +237,74 @@ class MessageList extends Component {
       });
     }
   }
-
+  async addBotMessageafterLogin(profile){
+      const { brand,territory } = this.state;
+      const {from_iframe} = this.props;
+      this.setState({ uid: profile.id });
+      this.setState({ profile});
+      let {tokens,tokenSpent} = profile;
+      let current_token = tokenSpent?(tokens-tokenSpent)||0:tokens;
+      if(profile.friends)
+        this.setState({friends: profile.friends});
+      if(this.isFirstLandingonSaving(profile)){
+          let bMessages = [
+            {
+              type: "bot",
+              message: "You are successfully logged in.",
+            },
+            {
+              type: "bot",
+              message: `Currently you have ${current_token} tokens in your account `+profile.firstname+`, which is equivalent to ${CurrencyOptions[territory]}${(current_token/100).toFixed(2)}.`,
+            },
+            {
+              type: "bot",
+              message: `Here’s ${CurrencyOptions[territory]}10 in tokens, to help you start saving.`,
+            },
+            {
+              type: "bot",
+              message: `You now have ${current_token + 1000 } tokens in your account, which is equivalent to ${CurrencyOptions[territory]}${((current_token + 1000)/100).toFixed(2)}.`,
+            },
+            
+          ];
+          if(!from_iframe)
+            bMessages.push({
+              type: "bot",
+              message: "Would you like to share your saving result with friends "+profile.firstname+`? You’ll earn ${CurrencyOptions[territory]}5 in tokens per friend.`,
+            });
+          addBotMessageGroup(bMessages);
+      
+          tokens =(tokens|| 0) + 1000;
+          profile.tokens = tokens;
+          this.setState({profile});
+          Firebase.updateUserById(profile.id, brand, {
+            tokens: tokens,
+          });
+          await Firebase.saveTokenHistory(brand, profile.id, {
+            created: new Date(),
+            amount: -1000,
+            type: "savingrobot",
+          });
+      }
+      else{
+        let bMessages = [
+          {
+            type: "bot",
+            message: "You are successfully logged in.",
+          },
+          {
+            type: "bot",
+            message: `Currently you have ${current_token} tokens in your account `+profile.firstname+`, which is equivalent to ${CurrencyOptions[territory]}${(current_token/100).toFixed(2)}.`,
+          },
+         
+        ];
+        if(!from_iframe)
+          bMessages.push({
+            type: "bot",
+            message: "Would you like to share your saving result with friends "+profile.firstname+`? You’ll earn ${CurrencyOptions[territory]}5 in tokens per friend.`,
+          });
+        addBotMessageGroup(bMessages);
+      }
+  }
   setMessageInState(message) {
     const messages = this.state.messages.slice();
     messages.push(message);
@@ -223,7 +312,7 @@ class MessageList extends Component {
   }
   addMessage = async (message) => {
     const { brand, uid, profile,friends,territory } = this.state;
-    let {totalsaving,retailers} = this.props;
+    let {totalsaving,retailers, from_iframe} = this.props;
     if (message.inputType === "input" && message.key === "firstname") {
       setTimeout(() => {
         this.scrollToBottom();
@@ -307,70 +396,12 @@ class MessageList extends Component {
         Firebase.getProfile(phone, brand).then(async (res) => {
           this.setState({loading:false});
           if (res) {
-            this.setState({ uid: res.id });
-            this.setState({ profile: res});
-            let {tokens,tokenSpent} = res;
-            let current_token = tokenSpent?(tokens-tokenSpent)||0:tokens;
-            if(res.friends)
-              this.setState({friends: res.friends});
             addUserMessage({
               type: "user",
               inputType: "yesno",
               key: "is_invite",
             });
-            if(this.isFirstLandingonSaving(res)){
-                addBotMessageGroup([
-                  {
-                    type: "bot",
-                    message: "You are successfully logged in.",
-                  },
-                  {
-                    type: "bot",
-                    message: `Currently you have ${current_token} tokens in your account `+profile.firstname+`, which is equivalent to ${CurrencyOptions[territory]}${(current_token/100).toFixed(2)}.`,
-                  },
-                  {
-                    type: "bot",
-                    message: `Here’s ${CurrencyOptions[territory]}10 in tokens, to help you start saving.`,
-                  },
-                  {
-                    type: "bot",
-                    message: `You now have ${current_token + 1000 } tokens in your account, which is equivalent to ${CurrencyOptions[territory]}${((current_token + 1000)/100).toFixed(2)}.`,
-                  },
-                  {
-                    type: "bot",
-                    message: "Would you like to share your saving result with friends "+profile.firstname+`? You’ll earn ${CurrencyOptions[territory]}5 in tokens per friend.`,
-                  },
-                  
-                ]);
-            
-                tokens =(tokens|| 0) + 1000;
-                profile.tokens = tokens;
-                this.setState({profile});
-                Firebase.updateUserById(res.id, brand, {
-                  tokens: tokens,
-                });
-                await Firebase.saveTokenHistory(brand, res.id, {
-                  created: new Date(),
-                  amount: -1000,
-                  type: "savingrobot",
-                });
-            }
-            else{
-              addBotMessageGroup([
-                {
-                  type: "bot",
-                  message: "You are successfully logged in.",
-                },
-                {
-                  type: "bot",
-                  message: `Currently you have ${current_token} tokens in your account `+profile.firstname+`, which is equivalent to ${CurrencyOptions[territory]}${(current_token/100).toFixed(2)}.`,
-                },
-                {
-                  type: "bot",
-                  message: "Would you like to share your saving result with friends "+profile.firstname+`? You’ll earn ${CurrencyOptions[territory]}5 in tokens per friend.`,
-                },
-              ]);
-            }
+            this.addBotMessageafterLogin(res);
             this.getBotMessageGroup();
           } else
             this.setState({
@@ -529,8 +560,6 @@ class MessageList extends Component {
             }
           }
       });
-     
-     
     }
     else if(message.key === "bill-price"){
       const {brand} = this.props;
@@ -589,27 +618,58 @@ class MessageList extends Component {
           ]);
         }
         else{
-          addUserMessage({
-            type: "user",
-            inputType: "yesno",
-            key: "is_member",
-          });
-          addBotMessageGroup([
-            {
-              type:"bot",
-              message:`Your Ecosystem will save you on average ${CurrencyOptions[territory]}`+weekly_save+` per week and ${CurrencyOptions[territory]}`+monthly_save+" per month with our friends, including:"
-            },
-            {
-              type:"card",
-              cards:cards,
-              retailerType:category,
-            },
-            {
-              type: "bot",
-              message: "Are you already a member?",
-            },
-          ]);
+          if(!from_iframe){
+            addUserMessage({
+              type: "user",
+              inputType: "yesno",
+              key: "is_member",
+            });
+            addBotMessageGroup([
+              {
+                type:"bot",
+                message:`Your Ecosystem will save you on average ${CurrencyOptions[territory]}`+weekly_save+` per week and ${CurrencyOptions[territory]}`+monthly_save+" per month with our friends, including:"
+              },
+              {
+                type:"card",
+                cards:cards,
+                retailerType:category,
+              },
+              {
+                type: "bot",
+                message: "Are you already a member?",
+              },
+            ]);
+          }
+          else{
+            addUserMessage({
+              type: "user",
+              inputType: "static",
+              message: `Ok I see`,
+              key: "in_iframe",
+            });
+            addBotMessageGroup([
+              {
+                type:"bot",
+                message:`Your Ecosystem will save you on average ${CurrencyOptions[territory]}`+weekly_save+` per week and ${CurrencyOptions[territory]}`+monthly_save+" per month with our friends, including:"
+              },
+              {
+                type:"card",
+                cards:cards,
+                retailerType:category,
+              },
+            ]);
+          }
         }
+      this.getBotMessageGroup();
+    }
+    else if(message.key === "in_iframe"){
+      addUserMessage({
+        type: "user",
+        inputType: "static",
+        message: `Take me to my Ecosystem,${window.mobileCheck()?"<br>":""} to spend my tokens.`,
+        key: "final",
+      });
+      this.addBotMessageafterLogin(this.state.profile);
       this.getBotMessageGroup();
     }
     else if(message.key === "agree"){
@@ -619,10 +679,15 @@ class MessageList extends Component {
       else
         this.getBotMessageGroup();
     }else if(message.key === "final"){
-      if(brand!=="Ecosystem")
+      if(!from_iframe){
+        if(brand!=="Ecosystem")
         window.location.href = 'http://ecosystem.life/'+brand;
       else
         window.location.href = 'http://ecosystem.life';
+      }
+      else{
+        postMessage('back_ecosystem', true);
+      }
     }
     else {
       if (!message.finish) {
