@@ -58,7 +58,8 @@ class Screen extends React.Component {
         this.props.dispatch(saveBrand(res));
     })
     const parsed_uid = parsed.get("uid");
-
+    const parsed_iframe = parsed.get("iframe") || false;
+    this.setState({from_iframe:parsed_iframe});
     if (parsed_uid) {
       let res = await Firebase.getProfileByUID(parsed_uid, name);
       res.id = parsed_uid;
@@ -76,7 +77,6 @@ class Screen extends React.Component {
           uid: parsed_uid,
           restart: true,
           loading: false,
-          from_iframe:true
         });
        
       } else {
@@ -100,9 +100,9 @@ class Screen extends React.Component {
     const { name, icon, logo } = this.props;
     return (
       <div>
-      <Header name={name} logo={logo}></Header>
+      {!from_iframe&&<Header name={name} logo={logo}></Header>}
       <div className="app-wrapper"> 
-        <div style={{height:90}}></div>
+        {!from_iframe&&<div style={{height:90}}></div>}
         {loading && (
           <FadeLoader
             css={override}
