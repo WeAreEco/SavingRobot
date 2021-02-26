@@ -912,6 +912,31 @@ class Firebase {
     console.log("added");
     return firebase.firestore().collection("ecosystem_user").add(profile);
   }
+  static addHistory = (brand_name,uid,history)=>{
+    return new Promise((resolve, reject) => {
+      let fbInstance;
+      if (brand_name === "Ecosystem") {
+        fbInstance = firebase.firestore().collection("user");
+      } else {
+        fbInstance = firebase
+          .firestore()
+          .collection(brand_name)
+          .doc("data")
+          .collection("user");
+      }
+
+      fbInstance
+        .doc(`${uid}`)
+        .collection("histories")
+        .add(history)
+        .then((res) => {
+          resolve(res);
+        })
+        .catch((error) => {
+          reject(error);
+        });
+    });
+  }
 }
 Firebase.initialize();
 export default Firebase;

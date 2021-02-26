@@ -284,6 +284,10 @@ class MessageList extends Component {
             amount: -1000,
             type: "savingrobot",
           });
+          Firebase.addHistory(brand,profile.id,{
+            created: new Date(),
+            type: "complete savingrobot"
+          })
       }
       else{
         let bMessages = [
