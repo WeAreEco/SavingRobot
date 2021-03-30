@@ -88,26 +88,29 @@ class App extends Component {
                 />
               )}
             />)}
-            {!loading &&brands.map((item, index) => {
-              const { logo, name, icon } = item;
-              let brand = name.replace(/\s/g, "");
-              let path = "/" + brand;
-              return (
-                <Route
-                  path={path}
-                  key={index}
-                  render={(props) => (
-                    <Screen
-                      {...props}
-                      name={name}
-                      logo={logo}
-                      icon={icon}
-                      fromMobile={fromMobile}
-                    />
-                  )}
-                />
-              );
-            })}
+            {!loading &&
+            brands
+              .filter((obj) => !obj.deactive)
+              .map((item, index) => {
+                const { logo, name, icon } = item;
+                let brand = name.replace(/\s/g, "");
+                let path = "/" + brand;
+                return (
+                  <Route
+                    path={path}
+                    key={index}
+                    render={(props) => (
+                      <Screen
+                        {...props}
+                        name={name}
+                        logo={logo}
+                        icon={icon}
+                        fromMobile={fromMobile}
+                      />
+                    )}
+                  />
+                );
+              })}
           </Switch>
       </Fragment>
     );
